@@ -1,0 +1,8 @@
+excluded:
+  - Pods
+
+force_cast: warning # implicitly
+
+function_body_length:
+ - 200 # warning
+ - 300 # error

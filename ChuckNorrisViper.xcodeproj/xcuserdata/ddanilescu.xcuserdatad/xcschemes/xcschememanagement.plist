@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>ChuckNorrisViper.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>628372F21FB47FC500CBD3BE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>628373061FB47FC500CBD3BE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>628373111FB47FC500CBD3BE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>628F63521FC718D200D9EF48</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>

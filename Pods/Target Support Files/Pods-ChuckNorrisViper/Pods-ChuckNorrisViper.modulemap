@@ -1,0 +1,6 @@
+framework module Pods_ChuckNorrisViper {
+  umbrella header "Pods-ChuckNorrisViper-umbrella.h"
+
+  export *
+  module * { export * }
+}
