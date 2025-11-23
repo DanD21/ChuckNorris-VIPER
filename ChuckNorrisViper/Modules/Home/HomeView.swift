@@ -6,102 +6,94 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
     @StateObject private var presenter: HomePresenter
-    @StateObject private var navigationState = NavigationState()
+    @Environment(\.modelContext) private var modelContext
 
     init(presenter: HomePresenter = HomePresenter()) {
         _presenter = StateObject(wrappedValue: presenter)
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.black.ignoresSafeArea()
+        ZStack {
+            Color.black.ignoresSafeArea()
 
-                VStack(spacing: 20) {
-                    // Chuck Norris Icon/Header
-                    Text("🥋")
-                        .font(.system(size: 80))
+            VStack(spacing: 20) {
+                // Chuck Norris Icon/Header
+                Text("🥋")
+                    .font(.system(size: 80))
 
-                    Text("Chuck Norris Jokes")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                Text("Chuck Norris Jokes")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
 
-                    Spacer()
+                Spacer()
 
-                    // Joke Display
-                    if presenter.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(1.5)
-                    } else if let joke = presenter.currentJoke {
-                        ScrollView {
-                            Text(joke.value)
-                                .font(.title3)
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.center)
-                                .padding()
-                        }
-                    } else if let error = presenter.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                            .padding()
-                    } else {
-                        Text("Tap 'Random Joke' to get started!")
-                            .foregroundColor(.gray)
-                            .padding()
+                // Joke Display
+                if presenter.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.5)
+                } else if let joke = presenter.currentJoke {
+                    ScrollView {
+                        JokeCard(joke: joke, modelContext: modelContext)
+                            .padding(.horizontal)
                     }
-
-                    Spacer()
-
-                    // Action Buttons
-                    VStack(spacing: 15) {
-                        Button(action: {
-                            presenter.didTapRandomJoke()
-                        }) {
-                            HStack {
-                                Image(systemName: "arrow.clockwise")
-                                Text("Random Joke")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                        }
-
-                        Button(action: {
-                            presenter.didTapCategories()
-                        }) {
-                            HStack {
-                                Image(systemName: "list.bullet")
-                                Text("Browse Categories")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                        }
-                    }
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 30)
+                } else if let error = presenter.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                } else {
+                    Text("Tap 'Random Joke' to get started!")
+                        .foregroundColor(.gray)
+                        .padding()
                 }
-            }
-            .navigationDestination(isPresented: $navigationState.showCategories) {
-                CategoriesView()
+
+                Spacer()
+
+                // Action Button
+                Button(action: {
+                    presenter.didTapRandomJoke()
+                    saveToHistory()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Random Joke")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 30)
             }
         }
+        .navigationTitle("Home")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
-            // Wire up router navigation
-            if let router = (presenter as? HomePresenter)?.router as? HomeRouter {
-                router.navigationState = navigationState
+            if presenter.currentJoke == nil {
+                presenter.viewDidLoad()
             }
-            presenter.viewDidLoad()
+        }
+    }
+
+    private func saveToHistory() {
+        guard let joke = presenter.currentJoke else { return }
+
+        let history = JokeHistory(from: joke)
+        modelContext.insert(history)
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save to history: \(error)")
         }
     }
 }
@@ -117,5 +109,8 @@ enum HomeBuilder {
 }
 
 #Preview {
-    HomeBuilder.build()
+    NavigationStack {
+        HomeBuilder.build()
+            .modelContainer(for: [FavoriteJoke.self, JokeHistory.self])
+    }
 }

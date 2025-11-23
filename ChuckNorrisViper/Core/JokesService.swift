@@ -13,6 +13,7 @@ protocol JokesServiceProtocol: Sendable {
     func getRandomJoke() async throws -> Joke
     func getCategories() async throws -> Categories
     func getJokeByCategory(_ category: String) async throws -> Joke
+    func searchJokes(query: String) async throws -> [Joke]
 }
 
 // MARK: - Service Implementation
@@ -47,4 +48,21 @@ actor JokesService: JokesServiceProtocol {
         let joke = try JSONDecoder().decode(Joke.self, from: data)
         return joke
     }
+
+    func searchJokes(query: String) async throws -> [Joke] {
+        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        let urlString = "\(baseURL)/jokes/search?query=\(encodedQuery)"
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        let (data, _) = try await session.data(from: url)
+        let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+        return response.result
+    }
+}
+
+// MARK: - Search Response
+struct SearchResponse: Codable, Sendable {
+    let total: Int
+    let result: [Joke]
 }
